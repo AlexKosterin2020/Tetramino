@@ -10,4 +10,5 @@ BlockQueue.cs - block queue management
 Block.cs - block movement  
 Position.cs - stores information about the position on the playing field  
 Settings.cs - stores records, number of boosters, states and language  
-MosaicChoice.cs - stores the order of image generation in Mosaic mode
+MosaicChoice.cs - stores the order of image generation in Mosaic mode  
+other - types of blocks
