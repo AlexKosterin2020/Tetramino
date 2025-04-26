@@ -1,0 +1,1907 @@
+﻿<Window x:Class="Tetris_AI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tetris_AI"
+        xmlns:media="clr-namespace:System.Windows.Media;assembly=PresentationCore"
+        mc:Ignorable="d"
+        Title="Tetris" Height="600" Width="800"
+        MinWidth="600" MinHeight="600"
+        Foreground="White"
+        FontFamily="Mustica Pro SemBd" FontSize="28"
+        KeyDown="Window_KeyDown">
+
+    <Window.Resources>
+        <Style x:Key="MainMenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Cornsilk"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                Padding="10,0,10,3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PauseAndGameOverMenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="LightGreen"/>
+            <Setter Property="Margin" Value="0,20,0,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                Padding="20,3,20,5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Storyboard x:Key="BurnLineAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                    Storyboard.TargetName="AnimatedRow"
+                    From="1.0" To="0.0" Duration="0:0:0.5"
+                    RepeatBehavior="1x" FillBehavior="Stop"/>
+        </Storyboard>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--
+        <MediaElement x:Name="BackgroundVideo"
+                      Source="Assets/MainBackground.mp4"
+                      LoadedBehavior="Manual"
+                      Stretch="UniformToFill"
+                      Grid.RowSpan="2"
+                      Grid.ColumnSpan="3"
+                      IsMuted="True"
+                      MediaEnded="BackgroundVideo_MediaEnded"/>
+        -->
+        <MediaElement x:Name="BackgroundImage"
+                    Source="Assets/MainBackground.jpg"
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="3"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Visibility="Visible">
+        </MediaElement>
+
+        <StackPanel x:Name="StartMenu"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center">
+            
+            <Button x:Name="PentominoOptionButton"
+                    Content="Пентомино"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="PentominoOption_Click"/>
+
+            <Button x:Name="TetraminoOptionButton"
+                    Content="Тетромино"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TetraminoOption_Click"/>
+
+            <Button x:Name="TriminoOptionButton"
+                    Content="Тримино"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TriminoOption_Click"/>
+
+            <Button x:Name="SprintOptionButton"
+                    Content="Спринт"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintOption_Click"/>
+
+            <Button x:Name="OnlyTetrisModeButton"
+                    Content="ОнлиТетрис"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="OnlyTetrisMode_Click"/>
+
+            <Button x:Name="SurvivalModeButton"
+                    Content="Выживание"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SurvivalMode_Click"/>
+
+            <!--
+            <Button x:Name="ArcadeModeButton"
+                    Content="Аркада"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="ArcadeMode_Click"/>
+            -->
+
+            <Button x:Name="TampingModeButton"
+                    Content="Утрамбовка"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TampingMode_Click"/>
+
+            <Button x:Name="MosaicModeButton"
+                    Content="Мозаика"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="MosaicMode_Click"/>
+
+            <Button x:Name="MeditationModeButton"
+                    Content="Медитация"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="MeditationMode_Click"/>
+
+            <Button x:Name="OptionsButton"
+                    Content="Опции"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="Options_Click"/>
+
+            <Button x:Name="ExitButton"
+                    Content="Выход"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="ExitButton_Click"/>
+        </StackPanel>
+
+        <StackPanel x:Name="PentominoMenu"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Visibility="Hidden">
+
+            <Button x:Name="PentominoClassicModeButton"
+                    Content="Классика"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="PentominoClassicMode_Click"/>
+
+            <Button x:Name="PentominoWithBoostersModeButton"
+                    Content="С бустерами"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="PentominoWithBoostersMode_Click"/>
+
+            <Button x:Name="PentominoBackButton"
+                    Content="Назад"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="PentominoBackButton_Click"/>
+        </StackPanel>
+
+        <StackPanel x:Name="TetraminoMenu"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Visibility="Hidden">
+
+            <Button x:Name="TetraminoClassicModeButton"
+                    Content="Классика"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TetraminoClassicMode_Click"/>
+
+            <Button x:Name="TetraminoWithBoostersModeButton"
+                    Content="С бустерами"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TetraminoWithBoostersMode_Click"/>
+
+            <Button x:Name="TetraminoBackButton"
+                    Content="Назад"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TetraminoBackButton_Click"/>
+        </StackPanel>
+
+        <StackPanel x:Name="TriminoMenu"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Visibility="Hidden">
+
+            <Button x:Name="TriminoClassicModeButton"
+                    Content="Классика"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TriminoClassicMode_Click"/>
+
+            <Button x:Name="TriminoWithBoostersModeButton"
+                    Content="С бустерами"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TriminoWithBoostersMode_Click"/>
+
+            <Button x:Name="TriminoBackButton"
+                    Content="Назад"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="TriminoBackButton_Click"/>
+        </StackPanel>
+
+        <StackPanel x:Name="SprintMenu"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Visibility="Hidden">
+
+            <Button x:Name="SprintPentominoModeButton"
+                    Content="Пентомино"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintPentominoMode_Click"/>
+
+            <Button x:Name="SprintTetrominoModeButton"
+                    Content="Тетромино"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintTetrominoMode_Click"/>
+
+            <Button x:Name="SprintTriminoModeButton"
+                    Content="Тримино"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintTriminoMode_Click"/>
+
+            <Button x:Name="SprintLinesModeButton"
+                    Content="Линии"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintLinesMode_Click"/>
+
+            <Button x:Name="SprintPointsModeButton"
+                    Content="Очки"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintPointsMode_Click"/>
+
+            <Button x:Name="SprintBackButton"
+                    Content="Назад"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="SprintBackButton_Click"/>
+        </StackPanel>
+
+        <StackPanel x:Name="OptionsMenu"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    Visibility="Hidden">
+            
+            <Button x:Name="GhostOptionButton"
+                    Content="Призрак"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="GhostOptionButton_Click"/>
+
+            <Button x:Name="HoldOptionButton"
+                    Content="Удержание"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="HoldOptionButton_Click"/>
+
+            <Button x:Name="MusicOptionButton"
+                    Content="Музыка"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="MusicOptionButton_Click"/>
+            
+            <Button x:Name="LanguageOptionButton"
+                    Content="Русский"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="LanguageOptionButton_Click"/>
+
+            <Button x:Name="BackButton"
+                    Content="Назад"
+                    FontSize="24"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Click="BackButton_Click"/>
+        </StackPanel>
+
+        <StackPanel x:Name="OptionText"
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="3"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="0,100,0,0"
+                    Visibility="Hidden">
+            <TextBlock FontSize="24"
+                       TextAlignment="Left">
+                Опции применяются ко всем режимам кроме «Медитации»<LineBreak/>
+                «Призрак» принудительно отключен в режимах «Утрамбовка» и «Мозаика»
+            </TextBlock>
+        </StackPanel>
+
+        <StackPanel x:Name="OptionTextEnglish"
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="3"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Margin="0,100,0,0"
+                    Visibility="Hidden">
+            <TextBlock FontSize="24"
+                    TextAlignment="Left">
+                The options apply to all modes except «Meditation»<LineBreak/>
+                «Ghost» is forcibly switched off in the «Stamping» and «Mosaic» modes
+            </TextBlock>
+        </StackPanel>
+
+        <Viewbox Grid.Row="1"
+                 Grid.Column="1"
+                 Margin="0,0,0,20">
+            <Canvas x:Name="GameCanvas"
+                    Background="#101010"
+                    Width="250"
+                    Height="510"
+                    ClipToBounds="True"
+                    Visibility="Hidden"/>
+        </Viewbox>
+
+        <Viewbox Grid.Row="1"
+                 Grid.Column="1"
+                 Margin="0,0,0,20">
+            <Canvas x:Name="GameCanvasBig"
+                    Background="#101010"
+                    Width="280"
+                    Height="450"
+                    ClipToBounds="True"
+                    Visibility="Hidden"/>
+        </Viewbox>
+
+        <Viewbox Grid.Row="1"
+                 Grid.Column="1"
+                 Margin="0,0,0,20">
+            <Canvas x:Name="GameCanvasSmall"
+                    Background="#101010"
+                    Width="160"
+                    Height="310"
+                    ClipToBounds="True"
+                    Visibility="Hidden"/>
+        </Viewbox>
+
+        <StackPanel x:Name="MosaicImagePanel"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Visibility="Visible">
+            <Image
+                    x:Name="MosaicImage"
+                    Margin="100,120,0,0"
+                    Height="600"
+                    Width="400"/>
+        </StackPanel>
+
+        <TextBlock x:Name="ScoreText"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   Text="Очки: "
+                   Margin="0, 10"
+                   TextAlignment="Center"
+                   Visibility="Hidden"/>
+
+        <TextBlock x:Name="StopwatchText"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   Text=""
+                   Margin="0, 10"
+                   TextAlignment="Center"
+                   Visibility="Hidden"/>
+
+        <TextBlock x:Name="DelayText"
+                   Grid.Row="0"
+                   Grid.Column="0"
+                   Text="Задержка: "
+                   Margin="20, 10"
+                   TextAlignment="Left"
+                   Visibility="Hidden"/>
+        
+        <!--
+        <TextBlock x:Name="drawTileIndexText"
+                   Grid.Row="0"
+                   Grid.Column="0"
+                   Text="drawTileIndex = "
+                   Margin="20, 10"
+                   TextAlignment="Left"
+                   Visibility="Visible"/>
+        -->
+
+        <StackPanel x:Name="HoldPocket"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Visibility="Hidden">
+            <TextBlock x:Name="HoldPocketText"
+                       Text="На удержании"
+                       FontSize="22"
+                       TextAlignment="Center"/>
+            <Image x:Name="HoldImage"
+                   Margin="20"
+                   Width="125"/>
+        </StackPanel>
+
+        <StackPanel x:Name="NextPocket"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Visibility="Hidden">
+            <TextBlock x:Name="NextPocketText"
+                       Text="Следующий"
+                       FontSize="22"
+                       TextAlignment="Center"/>
+            <Image x:Name="NextImage"
+                   Margin="20"
+                   Width="125"/>
+        </StackPanel>
+
+        <StackPanel x:Name="ScoreMultiplierPocket"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Margin="30,280,0,0"
+                    Visibility="Hidden">
+
+            <TextBlock x:Name="ScoreMultiplierText"
+                       Text="Множитель очков-"
+                       FontSize="22"
+                       TextAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel x:Name="ClearedLinePocket"
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Margin="30,350,0,0"
+                    Visibility="Hidden">
+
+            <TextBlock x:Name="ClearedLineText"
+                       Text="Линий-"
+                       FontSize="22"
+                       TextAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel x:Name="SprintPentominoMaxLine"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Visibility="Hidden">
+            <TextBlock Text="16"
+                       FontSize="22"
+                       TextAlignment="Center"
+                       Margin="60,0,10,320"/>
+        </StackPanel>
+
+        <StackPanel x:Name="SprintTetrominoMaxLine"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Visibility="Hidden">
+            <TextBlock Text="15"
+                       FontSize="22"
+                       TextAlignment="Center"
+                       Margin="60,0,-40,350"/>
+        </StackPanel>
+
+        <StackPanel x:Name="SprintTriminoMaxLine"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Visibility="Hidden">
+            <TextBlock Text="11"
+                       FontSize="28"
+                       TextAlignment="Center"
+                       Margin="60,0,-30,300"/>
+        </StackPanel>
+
+        <StackPanel x:Name="TampingMaxLine"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Visibility="Hidden">
+            <TextBlock Text="11"
+                       FontSize="22"
+                       TextAlignment="Center"
+                       Margin="60,0,-40,45"/>
+        </StackPanel>
+
+        <StackPanel x:Name="BoostersPocket"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Margin="0,350,30,0"
+                    Visibility="Hidden">
+
+                    <TextBlock x:Name="GetStickText"
+                                Text="Палка - Q: "
+                                FontSize="22"
+                                TextAlignment="Right"/>
+
+                    <TextBlock x:Name="CloseHolesText"
+                                Text="Закрыть дырки - W: "
+                                FontSize="22"
+                                TextAlignment="Right"/>
+
+                    <TextBlock x:Name="DownwardShiftText"
+                                Text="Сдвиг вниз - E: "
+                                FontSize="22"
+                                TextAlignment="Right"/>
+
+                    <TextBlock x:Name="EmptyGlassText"
+                                Text="Пустой стакан - R: "
+                                FontSize="22"
+                                TextAlignment="Right"/>
+        </StackPanel>
+
+        <StackPanel x:Name="PauseButton"
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Visibility="Hidden">
+            <Button x:Name="HelpeButtonText"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Content="Помощь"
+                    Margin="10"
+                    Click="HelpButton_Click"/>
+
+            <Button x:Name="PauseButtonText"
+                    Style="{StaticResource MainMenuButtonStyle}"
+                    Content="Пауза"
+                    Margin="10"
+                    Click="PauseButton_Click"/>
+        </StackPanel>
+
+        <Grid x:Name="HelpPentominoClassicMenu"
+                Background="#CC000000"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="3"
+                Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpPentominoClassicText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Пентомино - фигура, состоящая из 5-и квадратов.<LineBreak/>
+                    Задача этого режима набрать как можно больше очков.<LineBreak/>
+                    Больше очков ты получишь за сжигание большего количества линий за раз.<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    4 линии (Тетрис) - 1200 очков * (множитель очков + 1)<LineBreak/>
+                    5 линий (нет названия) - 2500 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    H - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpPentominoClassicMenuEnglish"
+                Background="#CC000000"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="3"
+                Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpPentominoClassicTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Pentomino is a figure consisting of 5 squares.<LineBreak/>
+                    The goal of this mode is to score as many points as possible.<LineBreak/>
+                    You will get more points for burning more lines at a time.<LineBreak/>
+                    <LineBreak/>
+                    1 line (singl) - 40 points * (point multiplier + 1)<LineBreak/>
+                    2 line (double) - 100 points * (point multiplier + 1)<LineBreak/>
+                    3 line (triple) - 300 points * (point multiplier + 1)<LineBreak/>
+                    4 line (Tetris) - 1200 points * (point multiplier + 1)<LineBreak/>
+                    5 line (no name) - 2500 points * (point multiplier + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    H - help<LineBreak/>
+                    <LineBreak/>
+                    Good luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpPentominoWithBoostersMenu"
+                Background="#CC000000"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="3"
+                Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpPentominoWithBoostersText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Эта версия Пентомино с Бустерами подойдет уже опытным игрокам<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    4 линии (Тетрис) - 1200 очков * (множитель очков + 1)<LineBreak/>
+                    5 линий (нет названия) - 2500 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Q - вызвать следующим блоком Палку (максимум 4)<LineBreak/>
+                    W - закрыть 5 нижних черных точек (максимум 3)<LineBreak/>
+                    E - сдвинуть все плитки вниз до упора (максимум 2)<LineBreak/>
+                    R - полностью опустошить стакан (максимум 1)<LineBreak/>
+                    Бустеры можно заработать в других режимах!<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    H - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpPentominoWithBoostersMenuEnglish"
+                Background="#CC000000"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="3"
+                Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpPentominoWithBoostersTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    This version of Pentomino with Boosters will suit already experienced players<LineBreak/>
+                    <LineBreak/>
+                    1 line (singl) - 40 points * (point multiplier + 1)<LineBreak/>
+                    2 line (double) - 100 points * (point multiplier + 1)<LineBreak/>
+                    3 line (triple) - 300 points * (point multiplier + 1)<LineBreak/>
+                    4 line (Tetris) - 1200 points * (point multiplier + 1)<LineBreak/>
+                    5 line (no name) - 2500 points * (point multiplier + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Q - summon the Stick with the next block (max. 4)<LineBreak/>
+                    W - close the 5 bottom black holes (max. 3)<LineBreak/>
+                    E - push all tiles down as far as they will go (max. 2)<LineBreak/>
+                    R - empty the glass completely (max. 1)<LineBreak/>
+                    Boosters can be earned in other modes!<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    H - help<LineBreak/>
+                    <LineBreak/>
+                    Good luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTetrominoClassicMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTetrominoClassicText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Тетромино - фигура, состоящая из 4-х квадратов.<LineBreak/>
+                    Задача этого режима набрать как можно больше очков.<LineBreak/>
+                    Больше очков ты получишь за сжигание большего количества линий за раз.<LineBreak/>
+                    Это, кстати, и называется Тетрис - сжечь разом 4 линии.<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    4 линии (Тетрис) - 1200 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTetrominoClassicMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTetrominoClassicTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Tetromino is a figure consisting of 4 squares.<LineBreak/>
+                    The goal of this mode is to score as many points as possible.<LineBreak/>
+                    You will get more points for burning more lines at a time.<LineBreak/>
+                    That's what Tetris is called, by the way - burn four lines at once.<LineBreak/>
+                    <LineBreak/>
+                    1 line (singl) - 40 points * (point multiplier + 1)<LineBreak/>
+                    2 line (double) - 100 points * (point multiplier + 1)<LineBreak/>
+                    3 line (triple) - 300 points * (point multiplier + 1)<LineBreak/>
+                    4 line (Tetris) - 1200 points * (point multiplier + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    H - help<LineBreak/>
+                    <LineBreak/>
+                    Good luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTetrominoWithBoostersMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTetrominoWithBoostersText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Эта версия Тетромино с Бустерами подойдет уже опытным игрокам<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    4 линии (Тетрис) - 1200 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Q - вызвать следующим блоком Палку (максимум 4)<LineBreak/>
+                    W - закрыть 4 нижних черных точек (максимум 3)<LineBreak/>
+                    E - сдвинуть все плитки вниз до упора (максимум 2)<LineBreak/>
+                    R - полностью опустошить стакан (максимум 1)<LineBreak/>
+                    Бустеры можно заработать в других режимах!<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTetrominoWithBoostersMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTetrominoWithBoostersTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    This version of Tetromino with Boosters will suit already experienced players<LineBreak/>
+                    <LineBreak/>
+                    1 line (singl) - 40 points * (point multiplier + 1)<LineBreak/>
+                    2 line (double) - 100 points * (point multiplier + 1)<LineBreak/>
+                    3 line (triple) - 300 points * (point multiplier + 1)<LineBreak/>
+                    4 line (Tetris) - 1200 points * (point multiplier + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Q - summon the Stick with the next block (max. 4)<LineBreak/>
+                    W - close the 4 bottom black holes (max. 3)<LineBreak/>
+                    E - push all tiles down as far as they will go (max. 2)<LineBreak/>
+                    R - empty the glass completely (max. 1)<LineBreak/>
+                    Boosters can be earned in other modes!<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    H - help<LineBreak/>
+                    <LineBreak/>
+                    Good luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTriminoClassicMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTriminoClassicText"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Тримино - фигура, состоящая из 3-х квадратов.<LineBreak/>
+                    Задача этого режима набрать как можно больше очков.<LineBreak/>
+                    Больше очков ты получишь за сжигание большего количества линий за раз.<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTriminoClassicMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTriminoClassicTextEnglish"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Trimino is a figure consisting of 3 squares.<LineBreak/>
+                    The goal of this mode is to score as many points as possible.<LineBreak/>
+                    You will get more points for burning more lines at a time.<LineBreak/>
+                    <LineBreak/>
+                    1 line (singl) - 40 points * (point multiplier + 1)<LineBreak/>
+                    2 line (double) - 100 points * (point multiplier + 1)<LineBreak/>
+                    3 line (triple) - 300 points * (point multiplier + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    H - help<LineBreak/>
+                    <LineBreak/>
+                    Good luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTriminoWithBoostersMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTriminoWithBoostersText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Эта версия Тримино с Бустерами подойдет уже опытным игрокам<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Q - вызвать следующим блоком Палку (максимум 4)<LineBreak/>
+                    W - закрыть 3 нижние черные точки (максимум 3)<LineBreak/>
+                    E - сдвинуть все плитки вниз до упора (максимум 2)<LineBreak/>
+                    R - полностью опустошить стакан (максимум 1)<LineBreak/>
+                    Бустеры можно заработать в других режимах!<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTriminoWithBoostersMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTriminoWithBoostersTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    This version of Trimino with Boosters will suit already experienced players<LineBreak/>
+                    <LineBreak/>
+                    1 line (singl) - 40 points * (point multiplier + 1)<LineBreak/>
+                    2 line (double) - 100 points * (point multiplier + 1)<LineBreak/>
+                    3 line (triple) - 300 points * (point multiplier + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Q - summon the Stick with the next block (max. 4)<LineBreak/>
+                    W - close the 4 bottom black holes (max. 3)<LineBreak/>
+                    E - push all tiles down as far as they will go (max. 2)<LineBreak/>
+                    R - empty the glass completely (max. 1)<LineBreak/>
+                    Boosters can be earned in other modes!<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    H - help<LineBreak/>
+                    <LineBreak/>
+                    Good luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpOnlyTetrisMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpOnlyTetrisText"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Здесь не нужно гнаться за очками, ведь их здесь нет.<LineBreak/>
+                    Задача этого режима набрать как можно больше Тетрисов.<LineBreak/>
+                    Напомню, Тетрис - это соженные одновременно 4 линии.<LineBreak/>
+                    Поэтому если сжег меньше - Конец игры!<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Собрав 4 Тетриса, можно получить случайный бустер!<LineBreak/>
+                    <LineBreak/>
+                    Скорость падения блоков не меняется<LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpOnlyTetrisMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpOnlyTetrisTextEnglish"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    You do not need to chase points here, because they are not here.<LineBreak/>
+                    The task of this mode is to score as many Tetris as possible.<LineBreak/>
+                    Let me remind you, Tetris is 4 lines burned at the same time.<LineBreak/>
+                    So if you burned less - Game Over!<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Collecting 4 Tetris will get you a random booster! <LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSurvivalMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSurvivalText"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Можно ли играть в Тетрис бесконечно? На самом деле, да. Но все зависит от тебя.<LineBreak/>
+                    Задача этого режима продержаться как можно дольше, сжигая линии.<LineBreak/>
+                    Каждая сожженная линия немного увеличивает скорость падения блоков.<LineBreak/>
+                    Но сделав Тетрис (4 одновременно сожженные линии) ты можешь сильно снизить скорость.<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    ^ - удержать блок<LineBreak/>
+                    F - сбросить скорость<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Сжегши 40 линий, можно получить случайный бустер!<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSurvivalMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSurvivalTextEnglish"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Is it possible to play Tetris infinitely? Actually, yes. But it all depends on you.<LineBreak/>
+                    The goal of this mode is to last as long as possible by burning lines.<LineBreak/>
+                    Each burned line increases the speed of falling blocks a little bit.<LineBreak/>
+                    But by doing Tetris (4 simultaneously burnt lines) you can reduce the speed a lot.<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    ^ - hold block<LineBreak/>
+                    F - reset speed<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Burning 40 lines will get you a random booster! <LineBreak/>
+                    <LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <!--
+        <Grid x:Name="HelpArcadeMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpArcadeText"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Забудь про Тетрисы и сжигай линии, как тебе вздумается.<LineBreak/>
+                    За каждую соженную линию ты получишь 1 поинт.<LineBreak/>
+                    Эти поинты ты можешь тратить на различные бустеры.<LineBreak/>
+                    Бустеры помогут эффективнее сжигать линии или поправить положение фигур.<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    Q - вызвать следующим блоком Палку (1 поинт)<LineBreak/>
+                    W - закрыть 3 нижние черные точки (3 поинта)<LineBreak/>
+                    E - сдвинуть все плитки вниз до упора (5 поинтов)<LineBreak/>
+                    R - опустошить стакан (7 поинтов)<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+        -->
+
+        <Grid x:Name="HelpSprintPentominoMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintPentominoText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Спидран Тетриса, как тебе?<LineBreak/>
+                    Ставить фигуры в правильном положении мало,<LineBreak/>
+                    это нужно делать еще и быстро!<LineBreak/>
+                    Сможешь поставить рекорд скорости?<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Цель: как можно быстрее заполнить 17 линий стакана без пропусков ячеек<LineBreak/>
+                    <LineBreak/>
+                    Скорость падения блоков не меняется<LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintPentominoMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintPentominoTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Tetris speedrun, what do you think about this? <LineBreak/>
+                    It's not enough to get the pieces in the right position,<LineBreak/>
+                    you've got to do it quickly!<LineBreak/>
+                    Can you set a speed record? <LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Goal: to fill 17 lines of the glass as quickly as possible without skipping cells<LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintTetrominoMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintTetrominoText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Спидран Тетриса, как тебе?<LineBreak/>
+                    Ставить фигуры в правильном положении мало,<LineBreak/>
+                    это нужно делать еще и быстро!<LineBreak/>
+                    Сможешь поставить рекорд скорости?<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Цель: как можно быстрее заполнить 15 линий стакана без пропусков ячеек<LineBreak/>
+                    <LineBreak/>
+                    Скорость падения блоков не меняется<LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintTetrominoMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintTetrominoTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Tetris speedrun, what do you think about this? <LineBreak/>
+                    It's not enough to get the pieces in the right position,<LineBreak/>
+                    you've got to do it quickly!<LineBreak/>
+                    Can you set a speed record? <LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Goal: to fill 15 lines of the glass as quickly as possible without skipping cells<LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintTriminoMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintTriminoText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Спидран Тетриса, как тебе?<LineBreak/>
+                    Ставить фигуры в правильном положении мало,<LineBreak/>
+                    это нужно делать еще и быстро!<LineBreak/>
+                    Сможешь поставить рекорд скорости?<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Цель: как можно быстрее заполнить 11 линий стакана без пропусков ячеек<LineBreak/>
+                    <LineBreak/>
+                    Скорость падения блоков не меняется<LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintTriminoMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintTriminoTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Tetris speedrun, what do you think about this? <LineBreak/>
+                    It's not enough to get the pieces in the right position,<LineBreak/>
+                    you've got to do it quickly!<LineBreak/>
+                    Can you set a speed record? <LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Goal: to fill 11 lines of the glass as quickly as possible without skipping cells<LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintLinesMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintLinesText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Спидран Тетриса, как тебе?<LineBreak/>
+                    Ставить фигуры в правильном положении мало,<LineBreak/>
+                    это нужно делать еще и быстро!<LineBreak/>
+                    Сможешь поставить рекорд скорости?<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Цель: как можно быстрее сжечь 100 линий<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintLinesMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintLinesTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Tetris speedrun, what do you think about this? <LineBreak/>
+                    It's not enough to get the pieces in the right position,<LineBreak/>
+                    you've got to do it quickly!<LineBreak/>
+                    Can you set a speed record? <LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Goal: to burn 100 lines as quickly as possible<LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintPointsMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintPointsText"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Спидран Тетриса, как тебе?<LineBreak/>
+                    Ставить фигуры в правильном положении мало,<LineBreak/>
+                    это нужно делать еще и быстро!<LineBreak/>
+                    Сможешь поставить рекорд скорости?<LineBreak/>
+                    <LineBreak/>
+                    1 линия (сингл) - 40 очков * (множитель очков + 1)<LineBreak/>
+                    2 линии (дабл) - 100 очков * (множитель очков + 1)<LineBreak/>
+                    3 линии (трипл) - 300 очков * (множитель очков + 1)<LineBreak/>
+                    4 линии (Тетрис) - 1200 очков * (множитель очков + 1)<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    Пробел - жесткое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Цель: как можно быстрее набрать 100 000 очков<LineBreak/>
+                    <LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpSprintPointsMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpSprintPointsTextEnglish"
+                           FontSize="18"
+                           TextAlignment="Left">
+                    Tetris speedrun, what do you think about this? <LineBreak/>
+                    It's not enough to get the pieces in the right position,<LineBreak/>
+                    you've got to do it quickly!<LineBreak/>
+                    Can you set a speed record? <LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    Space - hard landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Goal: to score 100,000 points as quickly as possible<LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTampingMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTampingText"
+                        FontSize="18"
+                        TextAlignment="Left">
+                    Ставить Тетрисы, сжигая 4 линии разом, всегда приятно,<LineBreak/>
+                    но уметь управлять фигурами тоже нужно уметь.<LineBreak/>
+                    Вот мы и проверим как ты справляешь с этим!<LineBreak/>
+                    Заполни стакан на столько, на сколько сможешь.<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Заполнив 50 клеток, можно получить случайный бустер!<LineBreak/>
+                    <LineBreak/>
+                    Игра закончится, когда будет заполнена хотя бы 1 клетка выше 11-й линии<LineBreak/>
+                    Скорость падения блоков не меняется<LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpTampingMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpTampingTextEnglish"
+                        FontSize="18"
+                        TextAlignment="Left">
+                    It's always fun to set Tetris burning four lines at once,<LineBreak/>
+                    but you have to know how to control the blocks too.<LineBreak/>
+                    We're going to see how you manage it!<LineBreak/>
+                    Fill the glass as full as you can.<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Filling 50 cells will get you a random booster! <LineBreak/>
+                    <LineBreak/>
+                    The game will end when at least 1 cell above the 11th line is filled<LineBreak/> <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpMosaicMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpMosaicText"
+                            FontSize="18"
+                            TextAlignment="Left">
+                    Тетрис может быть часть чего-то большего, например, картины!<LineBreak/>
+                    Получится ли у тебя собрать ее целиком?<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Собрав картину целиком, можно получить случайный бустер!<LineBreak/>
+                    <LineBreak/>
+                    Скорость падения блоков со временем уменьшается<LineBreak/>
+                    Успехов!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpMosaicMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpMosaicTextEnglish"
+                            FontSize="18"
+                            TextAlignment="Left">
+                    Tetris can be part of something bigger, like a picture!<LineBreak/>
+                    Will you be able to assemble it entirely?<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    Putting the whole picture will get you a random booster! <LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Good Luck!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpMeditationMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpMeditationText"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Тетрис - не только соревновательная игра, но и медитативная.<LineBreak/>
+                    Для этого нужно всего лишь убрать увеличение скорости и интерфейс игры.<LineBreak/>
+                    Наслаждайся падением блоков под приятную музыку и попробуй расслабиться.<LineBreak/>
+                    <LineBreak/>
+                    &lt; и &gt; - движение фигурой в стороны<LineBreak/>
+                    v - мягкое приземление<LineBreak/>
+                    D и A - повороты фигурой по часовой и против часовой стрелки соответственно<LineBreak/>
+                    R - опустошить стакан<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - пауза<LineBreak/>
+                    C - справка<LineBreak/>
+                    <LineBreak/>
+                    Скорость падения блоков не меняется<LineBreak/>
+                    Всех приятностей!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="HelpMeditationMenuEnglish"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                <TextBlock x:Name="HelpMeditationTextEnglish"
+                             FontSize="18"
+                             TextAlignment="Left">
+                    Tetris is not only a competitive game, but also a meditative one.<LineBreak/>
+                    All you need to do is remove the speed boost and the game interface.<LineBreak/>
+                    Enjoy falling blocks to pleasant music and try to relax.<LineBreak/>
+                    <LineBreak/>
+                    &lt; and &gt; - movement of the blocks to the sides<LineBreak/>
+                    v - soft landing<LineBreak/>
+                    D and A - turn the blocks clockwise and counterclockwise respectively<LineBreak/>
+                    R - empty the glass<LineBreak/>
+                    <LineBreak/>
+                    Left Shift - pause<LineBreak/>
+                    C - help<LineBreak/>
+                    <LineBreak/>
+                    The speed of falling blocks does not change<LineBreak/>
+                    Have a good time!
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Button x:Name="CloseHelpButton"
+                Grid.Row="1"
+                Grid.Column="2"
+                Style="{StaticResource MainMenuButtonStyle}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Content="Закрыть"
+                Margin="10"
+                Visibility="Hidden"
+                Click="CloseHelpButton_Click"/>
+
+        <Grid x:Name="PauseMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Button x:Name="NextPauseMenuText"
+                        Content="Продолжить"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="PlayButton_Click"/>
+
+                <Button x:Name="RestartPauseMenuText"
+                        Content="Заново"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="PlayAgain_Click"/>
+
+                <Button x:Name="MusicPauseMenuText"
+                        Content="Музыка"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="MusicOptionButton_Click"/>
+
+                <Button x:Name="ExitMenuMenuText"
+                        Content="Меню"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="MainMenu_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="MeditationPauseMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Button x:Name="NextMeditationPauseMenuText"
+                        Content="Еще чуть-чуть"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="PlayButton_Click"/>
+
+                <Button x:Name="RestartMeditationPauseMenuText"
+                        Content="Ещё разок"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="PlayAgain_Click"/>
+
+                <Button x:Name="MusicMeditationPauseMenuText"
+                        Content="Музыка"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="MusicOptionButton_Click"/>
+
+                <Button x:Name="ExitMenuMeditationPauseMenuText"
+                        Content="Пока-пока"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="MainMenu_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="GameOverMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <TextBlock x:Name="EndGame" 
+                           Text="Окончено"
+                           FontSize="36"
+                           TextAlignment="Center"/>
+
+                <TextBlock x:Name="PrizeText" 
+                           Text="Твой бустер: "
+                           FontSize="28"
+                           TextAlignment="Center"
+                           Visibility="Hidden"/>
+
+                <TextBlock x:Name="MaxPrizeText" 
+                           Text="Ты собрал максимальное количество бустеров"
+                           FontSize="28"
+                           TextAlignment="Center"
+                           Visibility="Hidden"/>
+
+                <TextBlock x:Name="BestScoreText" 
+                           Text="Рекорд: "
+                           FontSize="28"
+                           TextAlignment="Center"/>
+
+                <TextBlock x:Name="FinalScoreText"
+                           Text="Очки: "
+                           FontSize="28"
+                           TextAlignment="Center"/>
+
+                <TextBlock x:Name="FinalStopwatchText"
+                           Text="Время: "
+                           FontSize="28"
+                           TextAlignment="Center"
+                           Visibility="Hidden"/>
+
+                <!--
+                <TextBlock x:Name="FinalScoreMultiplierText"
+                           Text="Уровень: "
+                           FontSize="28"
+                           TextAlignment="Center"/>
+                -->
+
+                <TextBlock x:Name="FinalLinesText"
+                           Text="Линий: "
+                           FontSize="28"
+                           TextAlignment="Center"/>
+
+                <Button x:Name="PlayAgainEndGame"
+                        Content="Заново"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="PlayAgain_Click"/>
+
+                <Button x:Name="ExitMenuEndGame"
+                        Content="Меню"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="MainMenu_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="MosaicGameOverMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+                    <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                        <TextBlock x:Name="WinResult"
+                                   Text="Картина собрана!"
+                                   FontSize="36"
+                                   TextAlignment="Center"/>
+
+                        <TextBlock x:Name="LoseResult"
+                                   Text="Не удалось!"
+                                   FontSize="36"
+                                   TextAlignment="Center"/>
+
+                        <TextBlock x:Name="MosaicPrizeText" 
+                                   Text="Твой бустер: "
+                                   FontSize="28"
+                                   TextAlignment="Center"/>
+                        
+                        <TextBlock x:Name="MosaicMaxPrizeText" 
+                                   Text="Ты собрал максимальное количество бустеров"
+                                   FontSize="28"
+                                   TextAlignment="Center"
+                                   Visibility="Hidden"/>
+
+                        <Button x:Name="MosaicPlayAgainEndGame"
+                                Content="Заново"
+                                Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                                FontSize="24"
+                                Click="PlayAgain_Click"/>
+
+                        <Button x:Name="MosaicExitMenuEndGame"
+                                Content="Меню"
+                                Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                                FontSize="24"
+                                Click="MainMenu_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="MeditationGameOverMenu"
+              Background="#CC000000"
+              Grid.RowSpan="2"
+              Grid.ColumnSpan="3"
+              Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <TextBlock x:Name="RelaxMeditationPlayAgainEndGame"
+                           Text="Расслабься"
+                           FontSize="36"
+                           TextAlignment="Center"/>
+
+                <Button x:Name="MeditationPlayAgainEndGame"
+                        Content="Отдохни еще немного"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="PlayAgain_Click"/>
+
+                <Button x:Name="MeditationExitMenuEndGame"
+                        Content="Как-нибудь позже"
+                        Style="{StaticResource PauseAndGameOverMenuButtonStyle}"
+                        FontSize="24"
+                        Click="MainMenu_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
